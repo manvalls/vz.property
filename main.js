@@ -10,7 +10,9 @@ if(!WeakMap){
   counter = 0;
   
   WeakMap = function(){
-    this._id = counter++;
+    Object.defineProperties(this,{
+      _id: {value: counter++}
+    });
   };
   
   Object.defineProperties(WeakMap.prototype,{
@@ -21,7 +23,12 @@ if(!WeakMap){
       return object['vzProperty' + this._id];
     }},
     set: {value: function(object,value){
-      object['vzProperty' + this._id] = value;
+      
+      Object.defineProperty(object,'vzProperty' + this._id,{
+        configurable: true,
+        value: value
+      });
+      
       return this;
     }}
   });
