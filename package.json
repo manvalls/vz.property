@@ -1,0 +1,15 @@
+{
+  "name": "vz.property",
+  "version": "1.0.0",
+  "description": "Implementation of private properties",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/manvalls/vz.property.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manvalls/vz.property/issues"
+  },
+  "author": "Manuel Valls Fernández <manolo@chatiku.com>",
+  "license": "LGPL-3.0"
+}
