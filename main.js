@@ -79,20 +79,27 @@ function mapProperty(topMap,propertyObject){
   property.set(this,propertyObject);
 }
 
+function getter(){
+  return top.get(this).get(property.get(this));
+}
+
+function setter(value){
+  if(value === undefined){
+    top.get(this).delete(property.get(this));
+    return value;
+  }
+  
+  top.get(this).set(property.get(this),value);
+  return value;
+}
+
 Object.defineProperties(mapProperty.prototype,{
   value: {
-    get: function(){
-      return top.get(this).get(property.get(this));
-    },
-    set: function(value){
-      if(value === undefined){
-        top.get(this).delete(property.get(this));
-        return;
-      }
-      
-      top.get(this).set(property.get(this),value);
-    }
+    get: getter,
+    set: setter
   },
+  get: {value: getter},
+  set: {value: setter},
   valueOf: {value: objectValueOf},
   toString: {value: objectToString}
 });

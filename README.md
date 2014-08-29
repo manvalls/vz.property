@@ -13,11 +13,13 @@ var Property = require('vz.property'),
 function Person(name){
   this.name = name;
   topSecretName.of(this).value = 'Agent ' + name;
+  // == topSecretName.of(this).set('Agent ' + name);
 }
 
 john = new Person('John');
 john.name; // John
 topSecretName.of(john).value; // Agent John
+// == topSecretName.of(john).get();
 
 ```
 
