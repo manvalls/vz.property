@@ -55,20 +55,26 @@ function objectProperty(topObject,propertyName){
   property.set(this,propertyName);
 }
 
+function oGetter(){
+  return top.get(this)[property.get(this)];
+}
+
+function oSetter(value){
+  if(value === undefined){
+    delete top.get(this)[property.get(this)];
+    return;
+  }
+  
+  top.get(this)[property.get(this)] = value;
+}
+
 Object.defineProperties(objectProperty.prototype,{
   value: {
-    get: function(){
-      return top.get(this)[property.get(this)];
-    },
-    set: function(value){
-      if(value === undefined){
-        delete top.get(this)[property.get(this)];
-        return;
-      }
-      
-      top.get(this)[property.get(this)] = value;
-    }
+    get: oGetter,
+    set: oSetter
   },
+  get: {value: oGetter},
+  set: {value: oSetter},
   valueOf: {value: objectValueOf},
   toString: {value: objectToString}
 });
@@ -79,11 +85,11 @@ function mapProperty(topMap,propertyObject){
   property.set(this,propertyObject);
 }
 
-function getter(){
+function mGetter(){
   return top.get(this).get(property.get(this));
 }
 
-function setter(value){
+function mSetter(value){
   if(value === undefined){
     top.get(this).delete(property.get(this));
     return value;
@@ -95,11 +101,11 @@ function setter(value){
 
 Object.defineProperties(mapProperty.prototype,{
   value: {
-    get: getter,
-    set: setter
+    get: mGetter,
+    set: mSetter
   },
-  get: {value: getter},
-  set: {value: setter},
+  get: {value: mGetter},
+  set: {value: mSetter},
   valueOf: {value: objectValueOf},
   toString: {value: objectToString}
 });
