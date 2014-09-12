@@ -1,8 +1,16 @@
 var Property,
+    
     map,
-    object,
+    string,
+    number,
+    undefProp,
+    nullProp,
+    trueProp,
+    falseProp,
+    
     top,
     property,
+    
     WeakMap = global.WeakMap,
     counter;
 
@@ -36,99 +44,117 @@ if(!WeakMap){
 }
 
 map = new WeakMap();
-object = new WeakMap();
+string = new WeakMap();
+number = new WeakMap();
+undefProp = new WeakMap();
+nullProp = new WeakMap();
+trueProp = new WeakMap();
+falseProp = new WeakMap();
 
 top = new WeakMap();
 property = new WeakMap();
 
-function objectValueOf(){
-  return this.value;
+
+function retProp(tob,prop){
+  top.set(this,tob);
+  property.set(this,prop);
 }
 
-function objectToString(){
-  return [this.value].concat('');
-}
-
-
-function objectProperty(topObject,propertyName){
-  top.set(this,topObject);
-  property.set(this,propertyName);
-}
-
-function oGetter(){
-  return top.get(this)[property.get(this)];
-}
-
-function oSetter(value){
-  if(value === undefined){
-    delete top.get(this)[property.get(this)];
-    return;
-  }
-  
-  top.get(this)[property.get(this)] = value;
-}
-
-Object.defineProperties(objectProperty.prototype,{
-  value: {
-    get: oGetter,
-    set: oSetter
-  },
-  get: {value: oGetter},
-  set: {value: oSetter},
-  valueOf: {value: objectValueOf},
-  toString: {value: objectToString}
-});
-
-
-function mapProperty(topMap,propertyObject){
-  top.set(this,topMap);
-  property.set(this,propertyObject);
-}
-
-function mGetter(){
+function getter(){
   return top.get(this).get(property.get(this));
 }
 
-function mSetter(value){
-  if(value === undefined){
-    top.get(this).delete(property.get(this));
-    return value;
-  }
-  
-  top.get(this).set(property.get(this),value);
-  return value;
+function setter(value){
+  return top.get(this).set(property.get(this),value);
 }
 
-Object.defineProperties(mapProperty.prototype,{
+Object.defineProperties(retProp.prototype,{
   value: {
-    get: mGetter,
-    set: mSetter
+    get: getter,
+    set: setter
   },
-  get: {value: mGetter},
-  set: {value: mSetter},
-  valueOf: {value: objectValueOf},
-  toString: {value: objectToString}
+  get: {value: getter},
+  set: {value: setter},
+  valueOf: {value: function(){
+    return this.value;
+  }},
+  toString: {value: function(){
+    return [this.value].concat('');
+  }}
 });
 
 
 module.exports = Property = function(){
   map.set(this,new WeakMap());
-  object.set(this,{});
+  string.set(this,{});
+  number.set(this,{});
 };
 
 Object.defineProperties(Property.prototype,{
   of: {
     value: function(index){
+      return new retProp(this,index);
+    }
+  },
+  get: {
+    value: function(index){
       
       switch(typeof index){
+        case 'boolean': return index?trueProp.get(this):falseProp.get(this);
+        case 'string':return string.get(this)[index];
+        case 'number': return number.get(this)[index];
+        case 'undefined': return undefProp.get(this);
         case 'object':
         case 'function':
-          if(index !== null) return new mapProperty(map.get(this),index);
-        default:
-          return new objectProperty(map.get(this),index);
+          if(index !== null) return map.get(this).get(index);
+          else return nullProp.get(this);
+      }
+      
+    }
+  },
+  set: {
+    value: function(index,value){
+      
+      if(value === undefined) switch(typeof index){
+        case 'boolean':
+          index?trueProp.delete(this):falseProp.delete(this);
+          break;
+        case 'string':
+          delete string.get(this)[index];
+          break;
+        case 'number':
+          delete number.get(this)[index];
+          break;
+        case 'undefined':
+          undefProp.delete(this);
+          break;
+        case 'object':
+        case 'function':
+          if(index !== null) map.get(this).delete(index);
+          else nullProp.delete(this);
+          break;
+      }
+      else switch(typeof index){
+        case 'boolean':
+          index?trueProp.set(this,value):falseProp.set(this,value);
+          break;
+        case 'string':
+          string.get(this)[index] = value;
+          break;
+        case 'number':
+          number.get(this)[index] = value;
+          break;
+        case 'undefined':
+          undefProp.set(this,value);
+          break;
+        case 'object':
+        case 'function':
+          if(index !== null) map.get(this).set(index,value);
+          else nullProp.set(this,value);
           break;
       }
       
+      return this;
     }
   }
 });

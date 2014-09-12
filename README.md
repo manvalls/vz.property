@@ -16,12 +16,14 @@ function Person(name){
   this.name = name;
   topSecretName.of(this).value = 'Agent ' + name;
   // == topSecretName.of(this).set('Agent ' + name);
+  // == topSecretName.set(this,'Agent ' + name);
 }
 
 john = new Person('John');
 john.name; // John
 topSecretName.of(john).value; // Agent John
 // == topSecretName.of(john).get();
+// == topSecretName.get(john);
 
 ```
 
