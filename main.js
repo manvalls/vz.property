@@ -156,6 +156,230 @@ Object.defineProperties(Property.prototype,{
       
       return this;
     }
+  },
+  default: {
+    value: function(index,value){
+      var obj,ret;
+      
+      switch(typeof index){
+        case 'object':
+        case 'function':
+          if(index !== null){
+            obj = map.get(this);
+            if((ret = obj.get(index)) === undefined) obj.set(index,ret = value);
+          }else if((ret = nullProp.get(this)) === undefined) nullProp.set(this,ret = value);
+          break;
+        case 'boolean':
+          if(index){
+            if((ret = trueProp.get(this)) === undefined) trueProp.set(this,ret = value);
+          }else{
+            if((ret = falseProp.get(this) === undefined)) falseProp.set(this,ret = value);
+          }
+          break;
+        case 'string':
+        case 'symbol':
+          obj = string.get(this);
+          if((ret = obj[index]) === undefined) obj[index] = ret = value;
+          break;
+        case 'number':
+          obj = number.get(this);
+          if((ret = obj[index]) === undefined) obj[index] = ret = value;
+          break;
+        case 'undefined':
+          if((ret = undefProp.get(this) === undefined)) undefProp.set(this,ret = value);
+          break;
+      }
+      
+      return ret;
+    }
+  },
+  rinc: {
+    value: function(index,n){
+      var v,_map;
+      
+      n = n || 1;
+      
+      switch(typeof index){
+        case 'boolean':
+          
+          if(index){
+            v = trueProp.get(this);
+            trueProp.set(this,v + n);
+            return v;
+          }
+          
+          v = falseProp.get(this);
+          falseProp.set(this,v + n);
+          return v;
+          
+        case 'string':
+          _map = string.get(this);
+          v = _map[index];
+          _map[index] += n
+          return v;
+        case 'number':
+          _map = number.get(this);
+          v = _map[index];
+          _map[index] += n
+          return v;
+        case 'undefined':
+          v = undefProp.get(this);
+          undefProp.set(this,v + n);
+          return v;
+        case 'object':
+        case 'function':
+          if(index !== null){
+            _map = map.get(this);
+            v = _map.get(index);
+            _map.set(index,v + n);
+            return v;
+          }
+          
+          v = nullProp.get(this);
+          nullProp.set(this,v + n);
+          return v;
+      }
+      
+    }
+  },
+  linc: {
+    value: function(index,n){
+      var v,_map;
+      
+      n = n || 1;
+      
+      switch(typeof index){
+        case 'boolean':
+          
+          if(index){
+            v = trueProp.get(this) + n;
+            trueProp.set(this,v);
+            return v;
+          }
+          
+          v = falseProp.get(this) + n;
+          falseProp.set(this,v);
+          return v;
+          
+        case 'string':
+          _map = string.get(this);
+          return _map[index] += n;
+        case 'number':
+          _map = number.get(this);
+          return _map[index] += n;
+        case 'undefined':
+          v = undefProp.get(this) + n;
+          undefProp.set(this,v);
+          return v;
+        case 'object':
+        case 'function':
+          if(index !== null){
+            _map = map.get(this);
+            v = _map.get(index) + n;
+            _map.set(index,v);
+            return v;
+          }
+          
+          v = nullProp.get(this) + n;
+          nullProp.set(this,v);
+          return v;
+      }
+      
+    }
+  },
+  rdec: {
+    value: function(index,n){
+      var v,_map;
+      
+      n = n || 1;
+      
+      switch(typeof index){
+        case 'boolean':
+          
+          if(index){
+            v = trueProp.get(this);
+            trueProp.set(this,v - n);
+            return v;
+          }
+          
+          v = falseProp.get(this);
+          falseProp.set(this,v - n);
+          return v;
+          
+        case 'string':
+          _map = string.get(this);
+          v = _map[index];
+          _map[index] -= n
+          return v;
+        case 'number':
+          _map = number.get(this);
+          v = _map[index];
+          _map[index] -= n
+          return v;
+        case 'undefined':
+          v = undefProp.get(this);
+          undefProp.set(this,v - n);
+          return v;
+        case 'object':
+        case 'function':
+          if(index !== null){
+            _map = map.get(this);
+            v = _map.get(index);
+            _map.set(index,v - n);
+            return v;
+          }
+          
+          v = nullProp.get(this);
+          nullProp.set(this,v - n);
+          return v;
+      }
+      
+    }
+  },
+  ldec: {
+    value: function(index,n){
+      var v,_map;
+      
+      n = n || 1;
+      
+      switch(typeof index){
+        case 'boolean':
+          
+          if(index){
+            v = trueProp.get(this) - n;
+            trueProp.set(this,v);
+            return v;
+          }
+          
+          v = falseProp.get(this) - n;
+          falseProp.set(this,v);
+          return v;
+          
+        case 'string':
+          _map = string.get(this);
+          return _map[index] -= n;
+        case 'number':
+          _map = number.get(this);
+          return _map[index] -= n;
+        case 'undefined':
+          v = undefProp.get(this) - n;
+          undefProp.set(this,v);
+          return v;
+        case 'object':
+        case 'function':
+          if(index !== null){
+            _map = map.get(this);
+            v = _map.get(index) - n;
+            _map.set(index,v);
+            return v;
+          }
+          
+          v = nullProp.get(this) - n;
+          nullProp.set(this,v);
+          return v;
+      }
+      
+    }
   }
 });
 
