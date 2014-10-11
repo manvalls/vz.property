@@ -75,6 +75,10 @@ Object.defineProperties(retProp.prototype,{
   },
   get: {value: getter},
   set: {value: setter},
+  rinc: {value: function(n){ return top.get(this).rinc(property.get(this),n); }},
+  linc: {value: function(n){ return top.get(this).linc(property.get(this),n); }},
+  rdec: {value: function(n){ return top.get(this).rdec(property.get(this),n); }},
+  ldec: {value: function(n){ return top.get(this).ldec(property.get(this),n); }},
   valueOf: {value: function(){
     return this.value;
   }},
