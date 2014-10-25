@@ -1,71 +1,28 @@
 var Property,
+    Su = require('vz.rand').Su,
     
-    map,
-    string,
-    number,
-    undefProp,
-    nullProp,
-    trueProp,
-    falseProp,
+    su = Su(),
+    string = Su(),
+    number = Su(),
+    undefProp = Su(),
+    nullProp = Su(),
+    trueProp = Su(),
+    falseProp = Su(),
     
-    top,
-    property,
-    
-    WeakMap = global.WeakMap,
-    counter;
-
-if(!WeakMap){
-  counter = 0;
-  
-  WeakMap = function(){
-    Object.defineProperties(this,{
-      _id: {value: counter++}
-    });
-  };
-  
-  Object.defineProperties(WeakMap.prototype,{
-    delete: {value: function(object){
-      return delete object['vzProperty' + this._id];
-    }},
-    get: {value: function(object){
-      return object['vzProperty' + this._id];
-    }},
-    set: {value: function(object,value){
-      
-      Object.defineProperty(object,'vzProperty' + this._id,{
-        configurable: true,
-        value: value
-      });
-      
-      return this;
-    }}
-  });
-  
-}
-
-map = new WeakMap();
-string = new WeakMap();
-number = new WeakMap();
-undefProp = new WeakMap();
-nullProp = new WeakMap();
-trueProp = new WeakMap();
-falseProp = new WeakMap();
-
-top = new WeakMap();
-property = new WeakMap();
-
+    top = Su(),
+    property = Su();
 
 function retProp(tob,prop){
-  top.set(this,tob);
-  property.set(this,prop);
+  this[top] = tob;
+  this[property] = prop;
 }
 
 function getter(){
-  return top.get(this).get(property.get(this));
+  return this[top].get(this[property]);
 }
 
 function setter(value){
-  return top.get(this).set(property.get(this),value);
+  return this[top].set(this[property],value);
 }
 
 Object.defineProperties(retProp.prototype,{
@@ -75,10 +32,10 @@ Object.defineProperties(retProp.prototype,{
   },
   get: {value: getter},
   set: {value: setter},
-  rinc: {value: function(n){ return top.get(this).rinc(property.get(this),n); }},
-  linc: {value: function(n){ return top.get(this).linc(property.get(this),n); }},
-  rdec: {value: function(n){ return top.get(this).rdec(property.get(this),n); }},
-  ldec: {value: function(n){ return top.get(this).ldec(property.get(this),n); }},
+  rinc: {value: function(n){ return this[top].rinc(this[property],n); }},
+  linc: {value: function(n){ return this[top].linc(this[property],n); }},
+  rdec: {value: function(n){ return this[top].rdec(this[property],n); }},
+  ldec: {value: function(n){ return this[top].ldec(this[property],n); }},
   valueOf: {value: function(){
     return this.value;
   }},
@@ -89,9 +46,9 @@ Object.defineProperties(retProp.prototype,{
 
 
 module.exports = Property = function(){
-  map.set(this,new WeakMap());
-  string.set(this,{});
-  number.set(this,{});
+  this[su] = Su();
+  this[string] = {};
+  this[number] = {};
 };
 
 Object.defineProperties(Property.prototype,{
@@ -104,14 +61,14 @@ Object.defineProperties(Property.prototype,{
     value: function(index){
       
       switch(typeof index){
-        case 'boolean': return index?trueProp.get(this):falseProp.get(this);
-        case 'string':return string.get(this)[index];
-        case 'number': return number.get(this)[index];
-        case 'undefined': return undefProp.get(this);
+        case 'boolean': return index?this[trueProp]:this[falseProp];
+        case 'string':return this[string][index];
+        case 'number': return this[number][index];
+        case 'undefined': return this[undefProp];
         case 'object':
         case 'function':
-          if(index !== null) return map.get(this).get(index);
-          else return nullProp.get(this);
+          if(index !== null) return index[this[su]];
+          return this[nullProp];
       }
       
     }
@@ -121,40 +78,40 @@ Object.defineProperties(Property.prototype,{
       
       if(value === undefined) switch(typeof index){
         case 'boolean':
-          index?trueProp.delete(this):falseProp.delete(this);
+          index?delete this[trueProp]:delete this[falseProp];
           break;
         case 'string':
-          delete string.get(this)[index];
+          delete this[string][index];
           break;
         case 'number':
-          delete number.get(this)[index];
+          delete this[number][index];
           break;
         case 'undefined':
-          undefProp.delete(this);
+          delete this[undefProp];
           break;
         case 'object':
         case 'function':
-          if(index !== null) map.get(this).delete(index);
-          else nullProp.delete(this);
+          if(index !== null) delete index[this[su]];
+          else delete this[nullProp];
           break;
       }
       else switch(typeof index){
         case 'boolean':
-          index?trueProp.set(this,value):falseProp.set(this,value);
+          index?this[trueProp] = value:this[falseProp] = value;
           break;
         case 'string':
-          string.get(this)[index] = value;
+          this[string][index] = value;
           break;
         case 'number':
-          number.get(this)[index] = value;
+          this[number][index] = value;
           break;
         case 'undefined':
-          undefProp.set(this,value);
+          this[undefProp] = value;
           break;
         case 'object':
         case 'function':
-          if(index !== null) map.get(this).set(index,value);
-          else nullProp.set(this,value);
+          if(index !== null) index[this[su]] = value;
+          else this[nullProp] = value;
           break;
       }
       
@@ -169,28 +126,28 @@ Object.defineProperties(Property.prototype,{
         case 'object':
         case 'function':
           if(index !== null){
-            obj = map.get(this);
-            if((ret = obj.get(index)) === undefined) obj.set(index,ret = value);
-          }else if((ret = nullProp.get(this)) === undefined) nullProp.set(this,ret = value);
+            obj = this[su];
+            if((ret = index[obj]) === undefined) index[obj] = ret = value;
+          }else if((ret = this[nullProp]) === undefined) this[nullProp] = ret = value;
           break;
         case 'boolean':
           if(index){
-            if((ret = trueProp.get(this)) === undefined) trueProp.set(this,ret = value);
+            if((ret = this[trueProp]) === undefined) this[trueProp] = ret = value;
           }else{
-            if((ret = falseProp.get(this) === undefined)) falseProp.set(this,ret = value);
+            if((ret = this[falseProp]) === undefined) this[falseProp] = ret = value;
           }
           break;
         case 'string':
         case 'symbol':
-          obj = string.get(this);
+          obj = this[string];
           if((ret = obj[index]) === undefined) obj[index] = ret = value;
           break;
         case 'number':
-          obj = number.get(this);
+          obj = this[number];
           if((ret = obj[index]) === undefined) obj[index] = ret = value;
           break;
         case 'undefined':
-          if((ret = undefProp.get(this) === undefined)) undefProp.set(this,ret = value);
+          if((ret = this[undefProp]) === undefined) this[undefProp] = ret = value;
           break;
       }
       
@@ -199,7 +156,7 @@ Object.defineProperties(Property.prototype,{
   },
   rinc: {
     value: function(index,n){
-      var v,_map;
+      var v,map;
       
       n = n || 1;
       
@@ -207,40 +164,40 @@ Object.defineProperties(Property.prototype,{
         case 'boolean':
           
           if(index){
-            v = trueProp.get(this);
-            trueProp.set(this,v + n);
+            v = this[trueProp];
+            this[trueProp] = v + n;
             return v;
           }
           
-          v = falseProp.get(this);
-          falseProp.set(this,v + n);
+          v = this[falseProp];
+          this[trueProp] = v + n;
           return v;
           
         case 'string':
-          _map = string.get(this);
-          v = _map[index];
-          _map[index] += n
+          map = this[string];
+          v = map[index];
+          map[index] += n;
           return v;
         case 'number':
-          _map = number.get(this);
-          v = _map[index];
-          _map[index] += n
+          map = this[number];
+          v = map[index];
+          map[index] += n;
           return v;
         case 'undefined':
-          v = undefProp.get(this);
-          undefProp.set(this,v + n);
+          v = this[undefProp];
+          this[undefProp] = v + n;
           return v;
         case 'object':
         case 'function':
           if(index !== null){
-            _map = map.get(this);
-            v = _map.get(index);
-            _map.set(index,v + n);
+            map = this[su];
+            v = index[map];
+            index[map] = v + n;
             return v;
           }
           
-          v = nullProp.get(this);
-          nullProp.set(this,v + n);
+          v = this[nullProp];
+          this[nullProp] = v + n;
           return v;
       }
       
@@ -248,141 +205,42 @@ Object.defineProperties(Property.prototype,{
   },
   linc: {
     value: function(index,n){
-      var v,_map;
+      var v,map;
       
       n = n || 1;
       
       switch(typeof index){
         case 'boolean':
-          
-          if(index){
-            v = trueProp.get(this) + n;
-            trueProp.set(this,v);
-            return v;
-          }
-          
-          v = falseProp.get(this) + n;
-          falseProp.set(this,v);
-          return v;
+          if(index) return this[trueProp] += n;
+          return this[falseProp] += n;
           
         case 'string':
-          _map = string.get(this);
-          return _map[index] += n;
+          return this[string][index] += n;
+          
         case 'number':
-          _map = number.get(this);
-          return _map[index] += n;
+          return this[number][index] += n;
+          
         case 'undefined':
-          v = undefProp.get(this) + n;
-          undefProp.set(this,v);
-          return v;
+          return this[undefProp] += n;
+          
         case 'object':
         case 'function':
-          if(index !== null){
-            _map = map.get(this);
-            v = _map.get(index) + n;
-            _map.set(index,v);
-            return v;
-          }
-          
-          v = nullProp.get(this) + n;
-          nullProp.set(this,v);
-          return v;
+          if(index !== null) return index[this[su]] += n;
+          return this[nullProp] += n;
       }
       
     }
   },
   rdec: {
     value: function(index,n){
-      var v,_map;
-      
       n = n || 1;
-      
-      switch(typeof index){
-        case 'boolean':
-          
-          if(index){
-            v = trueProp.get(this);
-            trueProp.set(this,v - n);
-            return v;
-          }
-          
-          v = falseProp.get(this);
-          falseProp.set(this,v - n);
-          return v;
-          
-        case 'string':
-          _map = string.get(this);
-          v = _map[index];
-          _map[index] -= n
-          return v;
-        case 'number':
-          _map = number.get(this);
-          v = _map[index];
-          _map[index] -= n
-          return v;
-        case 'undefined':
-          v = undefProp.get(this);
-          undefProp.set(this,v - n);
-          return v;
-        case 'object':
-        case 'function':
-          if(index !== null){
-            _map = map.get(this);
-            v = _map.get(index);
-            _map.set(index,v - n);
-            return v;
-          }
-          
-          v = nullProp.get(this);
-          nullProp.set(this,v - n);
-          return v;
-      }
-      
+      return this.rinc(index,-n);
     }
   },
   ldec: {
     value: function(index,n){
-      var v,_map;
-      
       n = n || 1;
-      
-      switch(typeof index){
-        case 'boolean':
-          
-          if(index){
-            v = trueProp.get(this) - n;
-            trueProp.set(this,v);
-            return v;
-          }
-          
-          v = falseProp.get(this) - n;
-          falseProp.set(this,v);
-          return v;
-          
-        case 'string':
-          _map = string.get(this);
-          return _map[index] -= n;
-        case 'number':
-          _map = number.get(this);
-          return _map[index] -= n;
-        case 'undefined':
-          v = undefProp.get(this) - n;
-          undefProp.set(this,v);
-          return v;
-        case 'object':
-        case 'function':
-          if(index !== null){
-            _map = map.get(this);
-            v = _map.get(index) - n;
-            _map.set(index,v);
-            return v;
-          }
-          
-          v = nullProp.get(this) - n;
-          nullProp.set(this,v);
-          return v;
-      }
-      
+      return this.linc(index,-n);
     }
   }
 });

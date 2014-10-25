@@ -3,6 +3,9 @@
   "version": "1.2.1",
   "description": "Implementation of private properties",
   "main": "main.js",
+  "dependencies": {
+    "vz.rand": ""
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/manvalls/vz.property.git"
